@@ -16,18 +16,19 @@ import numpy as np
 from models.helper import build_generator
 from utils.logger import setup_logger
 from utils.editor import interpolate
-from utils.visualizer import load_image
+from utils.visualizer import load_image, save_image
 from utils.visualizer import HtmlPageVisualizer
 
 
 def parse_args():
   """Parses arguments."""
   parser = argparse.ArgumentParser()
-  parser.add_argument('model_name', type=str, help='Name of the GAN model.')
-  parser.add_argument('src_dir', type=str,
+  parser.add_argument('--model_name', type=str, default='styleganinv_tower256',
+                      help='Name of the GAN model.')
+  parser.add_argument('--src_dir', type=str, default='results/inversion/towers/',
                       help='Source directory, which includes original images, '
                            'inverted codes, and image list.')
-  parser.add_argument('dst_dir', type=str,
+  parser.add_argument('--dst_dir', type=str, default='results/inversion/towers/',
                       help='Target directory, which includes original images, '
                            'inverted codes, and image list.')
   parser.add_argument('-o', '--output_dir', type=str, default='',
@@ -73,6 +74,7 @@ def main():
       assert os.path.exists(f'{src_dir}/{name}_ori.png')
       src_list.append(name)
   src_codes = np.load(f'{src_dir}/inverted_codes.npy')
+  src_codes = src_codes[:len(src_list)] # limit
   assert src_codes.shape[0] == len(src_list)
   num_src = src_codes.shape[0]
   dst_list = []
@@ -82,6 +84,7 @@ def main():
       assert os.path.exists(f'{dst_dir}/{name}_ori.png')
       dst_list.append(name)
   dst_codes = np.load(f'{dst_dir}/inverted_codes.npy')
+  dst_codes = dst_codes[:len(dst_list)] # limit
   assert dst_codes.shape[0] == len(dst_list)
   num_dst = dst_codes.shape[0]
 
@@ -113,9 +116,16 @@ def main():
       visualizer.set_cell(row_idx, step + 1, image=load_image(dst_path))
       for s, output_image in enumerate(output_images):
         visualizer.set_cell(row_idx, s + 1, image=output_image)
+        if s + 1 == 2:
+            src_path = src_list[src_idx]
+            src_name = os.path.splitext(os.path.basename(src_path))[0]
+            dst_path = dst_list[dst_idx]
+            dst_name = os.path.splitext(os.path.basename(dst_path))[0]
+            save_image(f'{output_dir}/{job_name}_{src_name}_to_{dst_name}_mixed.png', output_images[-1])
 
   # Save results.
   visualizer.save(f'{output_dir}/{job_name}.html')
+#   save_image(f'{output_dir}/{job_name}/{image_name}_modified.png', output_images[-1])
 
 
 if __name__ == '__main__':

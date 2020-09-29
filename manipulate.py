@@ -13,7 +13,7 @@ from tqdm import tqdm
 from models.helper import build_generator
 from utils.logger import setup_logger
 from utils.editor import manipulate
-from utils.visualizer import load_image
+from utils.visualizer import load_image, save_image
 from utils.visualizer import HtmlPageVisualizer
 
 
@@ -61,7 +61,8 @@ def main():
   boundary_name = os.path.splitext(os.path.basename(boundary_path))[0]
   output_dir = args.output_dir or 'results/manipulation'
   job_name = f'{boundary_name.upper()}_{image_dir_name}'
-  logger = setup_logger(output_dir, f'{job_name}.log', f'{job_name}_logger')
+  os.makedirs(os.path.join(output_dir, job_name), exist_ok=True)
+  logger = setup_logger(os.path.join(output_dir, job_name), f'{job_name}.log', f'{job_name}_logger')
 
   # Load model.
   logger.info(f'Loading generator.')
@@ -125,9 +126,12 @@ def main():
         codes[img_idx], latent_space_type='wp')['image']
     for s, output_image in enumerate(output_images):
       visualizer.set_cell(img_idx, s + 3, image=output_image)
+    image_path = image_list[img_idx]
+    image_name = os.path.splitext(os.path.basename(image_path))[0]
+    save_image(f'{output_dir}/{job_name}/{image_name}_modified.png', output_images[-1])
 
   # Save results.
-  visualizer.save(f'{output_dir}/{job_name}.html')
+  visualizer.save(f'{output_dir}/{job_name}/{job_name}.html')
 
 
 if __name__ == '__main__':

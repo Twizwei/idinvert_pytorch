@@ -34,7 +34,7 @@ def setup_logger(work_dir=None, logfile_name='log.txt', logger_name='logger'):
     SystemExit: If the work directory has already existed, of the logger with
       specified name `logger_name` has already existed.
   """
-
+#   print('logfile_name:', logfile_name)
   logger = logging.getLogger(logger_name)
   if logger.hasHandlers():  # Already existed
     raise SystemExit(f'Logger name `{logger_name}` has already been set up!\n'

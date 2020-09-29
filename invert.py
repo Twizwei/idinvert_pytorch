@@ -66,7 +66,11 @@ def main():
       perceptual_loss_weight=args.loss_weight_feat,
       regularization_loss_weight=args.loss_weight_enc,
       logger=logger)
+#   print('encode dim:', inverter.encode_dim)
   image_size = inverter.G.resolution
+#   print('image size:', image_size)
+#   print('G net resolution:', inverter.G.net.resolution)
+#   print('G net init_res:', inverter.G.net.init_res)
 
   # Load image list.
   logger.info(f'Loading image list.')
